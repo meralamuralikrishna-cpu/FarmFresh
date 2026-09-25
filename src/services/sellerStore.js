@@ -1,6 +1,6 @@
-const USERS_KEY = "pail_seller_users";
-const SESSION_KEY = "pail_seller_session";
-const DATA_KEY = "pail_seller_data";
+const USERS_KEY = "freshfarm_seller_users";
+const SESSION_KEY = "freshfarm_seller_session";
+const DATA_KEY = "freshfarm_seller_data";
 
 export const PRODUCT_TYPES = [
   "Cow Milk",
@@ -55,7 +55,7 @@ function seedData() {
       farmName: "Green Pasture Dairy",
       ownerName: "Ramesh Patel",
       phone: "9876543210",
-      email: "farmer@pail.demo",
+      email: "farmer@freshfarm.demo",
       address: "Village Kheda, Anand, Gujarat",
       bio: "Family-run dairy producing fresh milk and traditional dairy products.",
     },
@@ -305,14 +305,14 @@ export function loginSeller({ email, password }) {
 
   // Demo account for quick access
   if (
-    email.toLowerCase() === "farmer@pail.demo" &&
+    email.toLowerCase() === "farmer@freshfarm.demo" &&
     password === "farmer123" &&
-    !users.some((u) => u.email === "farmer@pail.demo")
+    !users.some((u) => u.email === "farmer@freshfarm.demo")
   ) {
     const demo = {
       id: "demo-seller",
       name: "Ramesh Patel",
-      email: "farmer@pail.demo",
+      email: "farmer@freshfarm.demo",
       phone: "9876543210",
       password: "farmer123",
       farmName: "Green Pasture Dairy",

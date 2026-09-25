@@ -33,7 +33,7 @@ export default function App() {
           element={
             <PlaceholderPage
               title="About"
-              blurb="The farms and people behind Pail will be introduced here."
+              blurb="The farms and people behind FreshFarm will be introduced here."
             />
           }
         />
@@ -42,7 +42,7 @@ export default function App() {
           element={
             <PlaceholderPage
               title="Contact"
-              blurb="Reach the Pail team — form coming soon."
+              blurb="Reach the FreshFarm team — form coming soon."
             />
           }
         />

@@ -13,7 +13,7 @@ export default function Home() {
         </div>
 
         <div className="home-hero__content">
-          <p className="home-hero__brand">Pail</p>
+          <p className="home-hero__brand">FreshFarm</p>
           <h1 className="home-hero__headline">
             Fresh milk, farm to door
           </h1>
@@ -26,7 +26,7 @@ export default function Home() {
               Order milk
             </Button>
             <Button as={Link} to="/seller/login" variant="ghost">
-              Sell with Pail
+              Sell with FreshFarm
             </Button>
           </div>
         </div>
@@ -34,7 +34,7 @@ export default function Home() {
 
       <section className="home-flow" aria-labelledby="flow-heading">
         <div className="home-flow__inner">
-          <h2 id="flow-heading">How Pail works</h2>
+          <h2 id="flow-heading">How FreshFarm works</h2>
           <p className="home-flow__intro">
             Three steps from pasture to your porch.
           </p>

@@ -29,7 +29,7 @@ function SellerShell() {
         <div className="seller-sidebar__brand">
           <span className="seller-sidebar__mark" aria-hidden="true" />
           <div>
-            <p className="seller-sidebar__app">Pail Seller</p>
+            <p className="seller-sidebar__app">FreshFarm Seller</p>
             <p className="seller-sidebar__farm">
               {profile?.farmName || "Your farm"}
             </p>

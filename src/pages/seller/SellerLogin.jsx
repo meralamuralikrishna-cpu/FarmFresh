@@ -51,7 +51,7 @@ export default function SellerLogin() {
     setMode("login");
     setForm((f) => ({
       ...f,
-      email: "farmer@pail.demo",
+      email: "farmer@freshfarm.demo",
       password: "farmer123",
     }));
   };
@@ -59,7 +59,7 @@ export default function SellerLogin() {
   return (
     <div className="seller-auth">
       <div className="seller-auth__panel">
-        <p className="seller-auth__brand">Pail</p>
+        <p className="seller-auth__brand">FreshFarm</p>
         <h1>{mode === "login" ? "Seller sign in" : "Register as farmer"}</h1>
         <p className="seller-auth__lede">
           Manage products, stock, orders, and deliveries from your farm
@@ -168,7 +168,7 @@ export default function SellerLogin() {
         </form>
 
         <p className="seller-auth__hint">
-          Demo: farmer@pail.demo / farmer123
+          Demo: farmer@freshfarm.demo / farmer123
         </p>
         <Link to="/" className="seller-auth__back">
           ← Back to storefront

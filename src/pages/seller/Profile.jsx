@@ -29,7 +29,7 @@ export default function Profile() {
         <div>
           <h1 className="seller-page__title">Seller profile</h1>
           <p className="seller-page__lede">
-            Farm details shown to customers on Pail.
+            Farm details shown to customers on FreshFarm.
           </p>
         </div>
       </div>

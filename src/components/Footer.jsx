@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer__inner">
         <div className="footer__brand">
-          <span className="footer__name">Pail</span>
+          <span className="footer__name">FreshFarm</span>
           <p>Fresh dairy from nearby farms, delivered on your schedule.</p>
         </div>
 
@@ -30,7 +30,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer__bar">
-        <span>© {new Date().getFullYear()} Pail</span>
+        <span>© {new Date().getFullYear()} FreshFarm</span>
       </div>
     </footer>
   );
