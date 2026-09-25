@@ -1,0 +1,435 @@
+.seller-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  background:
+    radial-gradient(ellipse 70% 40% at 100% 0%, var(--mist) 0%, transparent 50%),
+    var(--foam);
+}
+
+.seller-sidebar {
+  background: var(--pasture-deep);
+  color: #e8f3ec;
+  padding: 1.25rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.seller-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0.5rem;
+}
+
+.seller-sidebar__mark {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background:
+    radial-gradient(circle at 35% 30%, #fff 0 28%, transparent 29%),
+    linear-gradient(145deg, var(--leaf), #0d2f21);
+}
+
+.seller-sidebar__app {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.seller-sidebar__farm {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.seller-sidebar__nav {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.seller-sidebar__link {
+  white-space: nowrap;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(232, 243, 236, 0.78);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.seller-sidebar__link:hover,
+.seller-sidebar__link.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.seller-sidebar__foot {
+  display: none;
+}
+
+.seller-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.seller-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(247, 250, 248, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.seller-topbar__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.seller-topbar__storefront {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--pasture);
+}
+
+.seller-topbar__storefront:hover {
+  color: var(--pasture-deep);
+}
+
+.seller-content {
+  padding: 1.25rem 1.25rem 2.5rem;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.seller-page__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.seller-page__lede {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.seller-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.seller-stats {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 1.75rem;
+}
+
+.seller-stat {
+  padding: 1.1rem 1.15rem;
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.seller-stat__label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.seller-stat__value {
+  margin: 0.45rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--pasture-deep);
+}
+
+.seller-panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.15rem 1.2rem;
+}
+
+.seller-panel + .seller-panel {
+  margin-top: 1rem;
+}
+
+.seller-panel__title {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.seller-table-wrap {
+  overflow-x: auto;
+}
+
+.seller-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.seller-table th,
+.seller-table td {
+  text-align: left;
+  padding: 0.75rem 0.6rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.seller-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.seller-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--foam);
+  color: var(--pasture-deep);
+}
+
+.seller-badge--ok {
+  background: rgba(61, 155, 106, 0.15);
+  color: var(--pasture-deep);
+}
+
+.seller-badge--warn {
+  background: rgba(180, 120, 40, 0.15);
+  color: #8a5a12;
+}
+
+.seller-badge--muted {
+  background: var(--foam);
+  color: var(--muted);
+}
+
+.seller-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.seller-form__row {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.seller-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.seller-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.seller-field input,
+.seller-field select,
+.seller-field textarea {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--milk);
+  font: inherit;
+  color: var(--ink);
+}
+
+.seller-field input:focus,
+.seller-field select:focus,
+.seller-field textarea:focus {
+  outline: none;
+  border-color: var(--leaf);
+  background: #fff;
+}
+
+.seller-field textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.seller-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.seller-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.seller-btn--primary {
+  background: var(--pasture);
+  color: #fff;
+}
+
+.seller-btn--primary:hover {
+  background: var(--pasture-deep);
+}
+
+.seller-btn--ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.seller-btn--ghost:hover {
+  border-color: var(--pasture);
+  color: var(--pasture-deep);
+}
+
+.seller-btn--danger {
+  background: transparent;
+  border-color: rgba(160, 40, 40, 0.35);
+  color: #9a2a2a;
+}
+
+.seller-btn--danger:hover {
+  background: rgba(160, 40, 40, 0.08);
+}
+
+.seller-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.seller-empty {
+  margin: 0;
+  color: var(--muted);
+  padding: 1rem 0;
+}
+
+.seller-error {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(160, 40, 40, 0.08);
+  color: #9a2a2a;
+  font-size: 0.9rem;
+}
+
+.seller-success {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(61, 155, 106, 0.12);
+  color: var(--pasture-deep);
+  font-size: 0.9rem;
+}
+
+@media (min-width: 900px) {
+  .seller-shell {
+    grid-template-columns: 240px 1fr;
+  }
+
+  .seller-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 1.5rem 1rem;
+  }
+
+  .seller-sidebar__nav {
+    flex-direction: column;
+    overflow: visible;
+    flex: 1;
+  }
+
+  .seller-sidebar__link {
+    border-radius: 10px;
+  }
+
+  .seller-sidebar__foot {
+    display: block;
+    padding: 0.75rem 0.5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .seller-sidebar__user {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  .seller-sidebar__logout {
+    margin-top: 0.65rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.45rem 0.85rem;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .seller-sidebar__logout:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .seller-content {
+    padding: 1.75rem 2rem 3rem;
+  }
+
+  .seller-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .seller-form__row--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .seller-form__row--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

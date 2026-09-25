@@ -1,0 +1,74 @@
+.footer {
+  background: var(--pasture-deep);
+  color: rgba(255, 255, 255, 0.88);
+  padding: 3.5rem 1.5rem 1.5rem;
+}
+
+.footer__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  gap: 2.5rem;
+}
+
+.footer__name {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.footer__brand p {
+  margin: 0.75rem 0 0;
+  max-width: 28ch;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.footer__cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.footer__cols h4 {
+  margin: 0 0 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer__cols a {
+  display: block;
+  margin-bottom: 0.55rem;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.82);
+  transition: color 0.2s ease;
+}
+
+.footer__cols a:hover {
+  color: #fff;
+}
+
+.footer__bar {
+  max-width: 1120px;
+  margin: 2.5rem auto 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (min-width: 768px) {
+  .footer {
+    padding: 4rem 2rem 1.75rem;
+  }
+
+  .footer__inner {
+    grid-template-columns: 1.2fr 1fr;
+    align-items: start;
+  }
+}
