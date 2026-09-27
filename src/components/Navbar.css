@@ -66,6 +66,15 @@
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.navbar__logout:hover {
+  color: var(--ink);
 }
 
 .navbar__cta {

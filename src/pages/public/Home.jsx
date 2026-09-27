@@ -28,6 +28,9 @@ export default function Home() {
             <Button as={Link} to="/seller/login" variant="ghost">
               Sell with FreshFarm
             </Button>
+            <Button as={Link} to="/middleman/login" variant="ghost">
+              Deliver with us
+            </Button>
           </div>
         </div>
       </section>

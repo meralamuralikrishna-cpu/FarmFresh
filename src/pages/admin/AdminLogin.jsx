@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import "./SellerLayout.css";
-import "./SellerAuth.css";
+import "../seller/SellerLayout.css";
+import "../seller/SellerAuth.css";
 
-export default function SellerLogin() {
-  const { isSeller, login } = useAuth();
+export default function AdminLogin() {
+  const { isAdmin, loginAsAdmin } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
-  if (isSeller) return <Navigate to="/seller" replace />;
+  if (isAdmin) return <Navigate to="/admin" replace />;
 
   const enterDemo = () => {
     setError("");
     try {
-      login({ email: "farmer@freshfarm.demo", password: "farmer123" });
-      navigate("/seller");
+      loginAsAdmin({ email: "admin@freshfarm.demo", password: "admin123" });
+      navigate("/admin");
     } catch (err) {
       setError(err.message || "Something went wrong.");
     }
@@ -25,10 +25,9 @@ export default function SellerLogin() {
     <div className="seller-auth">
       <div className="seller-auth__panel">
         <p className="seller-auth__brand">FreshFarm</p>
-        <h1>Seller sign in</h1>
+        <h1>Admin control center</h1>
         <p className="seller-auth__lede">
-          Manage products, stock, orders, and deliveries from your farm
-          workspace.
+          Manage users, products, orders, payments, and platform analytics.
         </p>
 
         {error ? <p className="seller-error">{error}</p> : null}
@@ -39,12 +38,12 @@ export default function SellerLogin() {
             className="seller-btn seller-btn--primary"
             onClick={enterDemo}
           >
-            Continue as demo seller
+            Continue as demo admin
           </button>
         </div>
 
         <p className="seller-auth__hint">
-          No email or password — one click opens the seller demo.
+          No email or password — one click opens the admin demo.
         </p>
         <Link to="/" className="seller-auth__back">
           ← Back to storefront
