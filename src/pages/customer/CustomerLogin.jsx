@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import "./Customer.css";
 
 export default function CustomerLogin() {
   const { isCustomer, loginAsCustomer } = useAuth();
@@ -26,30 +25,37 @@ export default function CustomerLogin() {
   };
 
   return (
-    <div className="customer-auth">
-      <div className="customer-auth__panel">
-        <p className="customer-auth__brand">FreshFarm</p>
-        <h1>Customer sign in</h1>
-        <p className="customer-auth__lede">
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_60%_50%_at_20%_10%,var(--color-mist)_0%,transparent_55%),linear-gradient(160deg,var(--color-foam),var(--color-milk)_55%,var(--color-sky))] px-5 py-8">
+      <div className="w-full max-w-md animate-[auth-in_0.55s_cubic-bezier(0.22,1,0.36,1)_both] rounded-[18px] border border-line bg-white px-6 pb-6 pt-7 shadow-soft motion-reduce:animate-none">
+        <p className="font-display text-[1.75rem] font-extrabold tracking-[-0.04em] text-pasture-deep">
+          FreshFarm
+        </p>
+        <h1 className="mt-1.5 font-display text-[1.55rem] font-extrabold tracking-[-0.03em] text-ink">
+          Customer sign in
+        </h1>
+        <p className="mb-5 mt-2 text-[0.95rem] leading-normal text-muted">
           Order dairy, manage deliveries, and run your milk subscription.
         </p>
 
-        {error ? <p className="customer-error">{error}</p> : null}
+        {error ? (
+          <p className="mb-3 text-sm font-medium text-red-700">{error}</p>
+        ) : null}
 
-        <div className="customer-actions" style={{ marginTop: "0.5rem" }}>
-          <button
-            type="button"
-            className="customer-btn customer-btn--primary"
-            onClick={enterDemo}
-          >
-            Continue as demo customer
-          </button>
-        </div>
+        <button
+          type="button"
+          className="inline-flex w-full items-center justify-center rounded-full bg-pasture px-5 py-3 text-[0.95rem] font-semibold text-white transition hover:bg-pasture-deep"
+          onClick={enterDemo}
+        >
+          Continue as demo customer
+        </button>
 
-        <p className="customer-auth__hint">
+        <p className="mt-4 text-[0.82rem] text-muted">
           No email or password — one click opens the customer demo.
         </p>
-        <Link to="/seller/login" className="customer-auth__seller">
+        <Link
+          to="/seller/login"
+          className="mt-3.5 inline-block text-[0.9rem] font-semibold text-pasture hover:text-pasture-deep"
+        >
           Farmer? Open seller portal →
         </Link>
       </div>

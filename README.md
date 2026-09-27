@@ -8,6 +8,7 @@ Frontend-only React app. Auth, catalog, orders, deliveries, and admin data are s
 
 - React 19 + Vite
 - React Router
+- Tailwind CSS v4 (`@tailwindcss/vite`)
 - Oxlint
 
 ## Roles
@@ -29,6 +30,10 @@ Every portal uses one-click demo sign-in — no email or password fields.
 - Seller → **Continue as demo seller**
 - Delivery → **Continue as demo delivery partner**
 - Admin → **Continue as demo admin**
+
+## Styling
+
+Tailwind CSS v4 is wired through `@tailwindcss/vite`. Brand tokens live in `src/index.css` (`@theme`) as utilities like `bg-pasture`, `text-ink`, `font-display`, and `shadow-soft`. Existing page CSS still works alongside Tailwind.
 
 ## Scripts
 
