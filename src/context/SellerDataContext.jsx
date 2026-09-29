@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -13,6 +14,7 @@ import {
   deleteProduct,
   getEarningsSummary,
   loadSellerData,
+  syncPendingCustomerOrdersForSeller,
   updateProduct,
   updateProfile,
 } from "../services/sellerStore";
@@ -52,9 +54,28 @@ export function SellerDataProvider({ children }) {
     setVersion((v) => v + 1);
   }, []);
 
+  useEffect(() => {
+    if (!user?.id) return undefined;
+
+    const onSellerOrdersUpdated = (event) => {
+      if (event.detail?.sellerId === user.id) refresh();
+    };
+    const onStorage = (event) => {
+      if (event.key === `freshfarm_seller_data_${user.id}`) refresh();
+    };
+
+    window.addEventListener("freshfarm:seller-orders-updated", onSellerOrdersUpdated);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("freshfarm:seller-orders-updated", onSellerOrdersUpdated);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [user?.id, refresh]);
+
   const data = useMemo(() => {
     if (!user?.id) return null;
     void version;
+    syncPendingCustomerOrdersForSeller(user.id);
     return loadSellerData(user.id);
   }, [user, version]);
 

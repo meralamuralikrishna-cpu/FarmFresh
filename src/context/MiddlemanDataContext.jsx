@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -41,6 +42,24 @@ export function MiddlemanDataProvider({ children }) {
   const refresh = useCallback(() => {
     setVersion((v) => v + 1);
   }, []);
+
+  useEffect(() => {
+    if (!middleman?.id) return undefined;
+
+    const onOrdersUpdated = (event) => {
+      if (event.detail?.middlemanId === middleman.id) refresh();
+    };
+    const onStorage = (event) => {
+      if (event.key === `freshfarm_middleman_data_${middleman.id}`) refresh();
+    };
+
+    window.addEventListener("freshfarm:middleman-orders-updated", onOrdersUpdated);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("freshfarm:middleman-orders-updated", onOrdersUpdated);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [middleman?.id, refresh]);
 
   const data = useMemo(() => {
     if (!middleman?.id) return null;

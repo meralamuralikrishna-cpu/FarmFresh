@@ -1,26 +1,25 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { SellerDataProvider, useSellerData } from "../../context/SellerDataContext";
-import "./SellerLayout.css";
+import {
+  BrokerDataProvider,
+  useBrokerData,
+} from "../../context/BrokerDataContext";
+import "../seller/SellerLayout.css";
 
 const NAV = [
-  { to: "/seller", end: true, label: "Dashboard" },
-  { to: "/seller/products", label: "Products" },
-  { to: "/seller/orders", label: "Orders" },
-  { to: "/seller/deliveries", label: "Delivery" },
-  { to: "/seller/earnings", label: "Earnings" },
-  { to: "/seller/reviews", label: "Reviews" },
-  { to: "/seller/profile", label: "Profile" },
+  { to: "/broker", end: true, label: "Dashboard" },
+  { to: "/broker/submissions", label: "Farmer listings" },
+  { to: "/broker/profile", label: "Profile" },
 ];
 
-function SellerShell() {
-  const { user, logout } = useAuth();
-  const { profile } = useSellerData();
+function BrokerShell() {
+  const { broker, logoutBroker } = useAuth();
+  const { profile, stats } = useBrokerData();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate("/seller/login");
+    logoutBroker();
+    navigate("/broker/login");
   };
 
   return (
@@ -29,14 +28,15 @@ function SellerShell() {
         <div className="seller-sidebar__brand">
           <span className="seller-sidebar__mark" aria-hidden="true" />
           <div>
-            <p className="seller-sidebar__app">FreshFarm Farmer</p>
+            <p className="seller-sidebar__app">FreshFarm Broker</p>
             <p className="seller-sidebar__farm">
-              {profile?.farmName || "Your farm"}
+              {profile?.region || "Your region"}
+              {stats?.pending ? ` · ${stats.pending} pending` : ""}
             </p>
           </div>
         </div>
 
-        <nav className="seller-sidebar__nav" aria-label="Seller">
+        <nav className="seller-sidebar__nav" aria-label="Broker">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
@@ -52,8 +52,14 @@ function SellerShell() {
         </nav>
 
         <div className="seller-sidebar__foot">
-          <p className="seller-sidebar__user">{user?.name || user?.email}</p>
-          <button type="button" className="seller-sidebar__logout" onClick={handleLogout}>
+          <p className="seller-sidebar__user">
+            {broker?.name || broker?.email}
+          </p>
+          <button
+            type="button"
+            className="seller-sidebar__logout"
+            onClick={handleLogout}
+          >
             Sign out
           </button>
         </div>
@@ -61,7 +67,7 @@ function SellerShell() {
 
       <div className="seller-main">
         <header className="seller-topbar">
-          <p className="seller-topbar__label">Farmer workspace</p>
+          <p className="seller-topbar__label">Broker workspace</p>
           <a href="/" className="seller-topbar__storefront">
             View storefront
           </a>
@@ -74,10 +80,10 @@ function SellerShell() {
   );
 }
 
-export default function SellerLayout() {
+export default function BrokerLayout() {
   return (
-    <SellerDataProvider>
-      <SellerShell />
-    </SellerDataProvider>
+    <BrokerDataProvider>
+      <BrokerShell />
+    </BrokerDataProvider>
   );
 }

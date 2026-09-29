@@ -25,6 +25,12 @@ import {
   loginAdmin,
   logoutAdmin,
 } from "../services/adminStore";
+import {
+  getBrokerSession,
+  loginBroker,
+  logoutBroker,
+  getBrokerProfile,
+} from "../services/brokerStore";
 
 const AuthContext = createContext(null);
 
@@ -37,7 +43,7 @@ export function AuthProvider({ children }) {
       id: session.userId,
       email: session.email,
       role: session.role,
-      name: data.profile?.ownerName || "Seller",
+      name: data.profile?.ownerName || "Farmer",
     };
   });
 
@@ -76,12 +82,24 @@ export function AuthProvider({ children }) {
     };
   });
 
+  const [broker, setBroker] = useState(() => {
+    const session = getBrokerSession();
+    if (!session) return null;
+    const profile = getBrokerProfile();
+    return {
+      id: session.userId,
+      email: session.email,
+      role: session.role,
+      name: profile?.name || "Broker",
+    };
+  });
+
   const login = useCallback(({ email, password }) => {
     const loggedIn = loginSeller({ email, password });
     const data = loadSellerData(loggedIn.id);
     const next = {
       ...loggedIn,
-      name: data.profile?.ownerName || loggedIn.name || "Seller",
+      name: data.profile?.ownerName || loggedIn.name || "Farmer",
     };
     setUser(next);
     return next;
@@ -157,6 +175,22 @@ export function AuthProvider({ children }) {
     setAdmin(null);
   }, []);
 
+  const loginAsBroker = useCallback(({ email, password }) => {
+    const loggedIn = loginBroker({ email, password });
+    const profile = getBrokerProfile();
+    const next = {
+      ...loggedIn,
+      name: profile?.name || loggedIn.name || "Broker",
+    };
+    setBroker(next);
+    return next;
+  }, []);
+
+  const logoutBrokerAccount = useCallback(() => {
+    logoutBroker();
+    setBroker(null);
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -179,6 +213,10 @@ export function AuthProvider({ children }) {
       isAdmin: Boolean(admin && admin.role === "admin"),
       loginAsAdmin,
       logoutAdmin: logoutAdminAccount,
+      broker,
+      isBroker: Boolean(broker && broker.role === "broker"),
+      loginAsBroker,
+      logoutBroker: logoutBrokerAccount,
     }),
     [
       user,
@@ -197,6 +235,9 @@ export function AuthProvider({ children }) {
       admin,
       loginAsAdmin,
       logoutAdminAccount,
+      broker,
+      loginAsBroker,
+      logoutBrokerAccount,
     ]
   );
 

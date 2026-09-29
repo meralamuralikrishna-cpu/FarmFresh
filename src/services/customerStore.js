@@ -168,6 +168,11 @@ function seedCatalog() {
   ];
 }
 
+/** Default shop catalog — shared so Admin → Products matches /products. */
+export function getDefaultCatalogProducts() {
+  return seedCatalog();
+}
+
 function seedCustomerData(profileOverrides = {}) {
   const earlier = new Date(Date.now() - 86400000 * 3).toISOString();
   const yesterday = new Date(Date.now() - 86400000).toISOString();
@@ -314,11 +319,139 @@ export function getCatalog() {
   return catalog;
 }
 
+function saveCatalog(catalog) {
+  writeJson(CATALOG_KEY, catalog);
+}
+
+/**
+ * Publish a broker-accepted farmer listing into the customer product catalog.
+ */
+export function publishToCatalog({
+  productId,
+  farmerId,
+  farmerName,
+  farmName,
+  product,
+}) {
+  const catalog = getCatalog();
+  const stock = Number(product?.stock) || 0;
+  const next = {
+    id: productId,
+    name: product.name,
+    category: product.type || product.category || "Cow Milk",
+    price: Number(product.price) || 0,
+    unit: product.unit || "litre",
+    sellerId: farmerId,
+    sellerName: farmName || farmerName || "Farm",
+    stock,
+    available: product.available !== false && stock > 0,
+    rating: 0,
+    description: product.description || "",
+  };
+
+  const idx = catalog.findIndex((p) => p.id === next.id);
+  if (idx >= 0) {
+    catalog[idx] = {
+      ...catalog[idx],
+      ...next,
+      rating: catalog[idx].rating ?? 0,
+    };
+  } else {
+    catalog.unshift(next);
+  }
+  saveCatalog(catalog);
+  return next;
+}
+
+export function removeFromCatalog(productId) {
+  saveCatalog(getCatalog().filter((p) => p.id !== productId));
+}
+
+/**
+ * Ensure every admin-approved product appears in the shop catalog.
+ */
+export function syncAdminApprovedToCatalog(adminProducts = []) {
+  const catalog = getCatalog();
+  const existing = new Set(catalog.map((p) => p.id));
+  let changed = false;
+
+  for (const p of adminProducts) {
+    if (p.status !== "approved" || !p.id) continue;
+    if (existing.has(p.id)) continue;
+    catalog.unshift({
+      id: p.id,
+      name: p.name,
+      category: p.category || "Cow Milk",
+      price: Number(p.price) || 0,
+      unit: p.unit || "litre",
+      sellerId: p.sellerId || "unknown",
+      sellerName: p.seller || "Farm",
+      stock: Number(p.stock) || 0,
+      available: (Number(p.stock) || 0) > 0,
+      rating: 0,
+      description: p.description || "",
+    });
+    existing.add(p.id);
+    changed = true;
+  }
+
+  if (changed) saveCatalog(catalog);
+  return getCatalog();
+}
+
+/**
+ * Ensure every broker-accepted submission appears in the shop catalog.
+ * @deprecated Prefer admin approval → syncAdminApprovedToCatalog.
+ */
+export function syncAcceptedSubmissionsToCatalog(submissions = []) {
+  const catalog = getCatalog();
+  const existing = new Set(catalog.map((p) => p.id));
+  let changed = false;
+
+  for (const item of submissions) {
+    if (item.status !== "accepted" || !item.productId || !item.product) continue;
+    if (existing.has(item.productId)) continue;
+    catalog.unshift({
+      id: item.productId,
+      name: item.product.name,
+      category: item.product.type || item.product.category || "Cow Milk",
+      price: Number(item.product.price) || 0,
+      unit: item.product.unit || "litre",
+      sellerId: item.farmerId,
+      sellerName: item.farmName || item.farmerName || "Farm",
+      stock: Number(item.product.stock) || 0,
+      available:
+        item.product.available !== false &&
+        (Number(item.product.stock) || 0) > 0,
+      rating: 0,
+      description: item.product.description || "",
+    });
+    existing.add(item.productId);
+    changed = true;
+  }
+
+  if (changed) saveCatalog(catalog);
+  return getCatalog();
+}
+
 export function getProductById(productId) {
   return getCatalog().find((p) => p.id === productId) || null;
 }
 
 export function searchCatalog({ query = "", category = "" } = {}) {
+  // Keep catalog current with admin-approved products.
+  try {
+    const raw = localStorage.getItem("freshfarm_admin_data");
+    if (raw) {
+      const admin = JSON.parse(raw);
+      if (Array.isArray(admin?.products)) {
+        syncAdminApprovedToCatalog(admin.products);
+      }
+    }
+  } catch {
+    /* ignore corrupt storage */
+  }
+
   const q = query.trim().toLowerCase();
   return getCatalog().filter((p) => {
     const matchCat = !category || p.category === category;
@@ -327,7 +460,7 @@ export function searchCatalog({ query = "", category = "" } = {}) {
       p.name.toLowerCase().includes(q) ||
       p.category.toLowerCase().includes(q) ||
       p.sellerName.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q);
+      (p.description || "").toLowerCase().includes(q);
     return matchCat && matchQ;
   });
 }
@@ -441,10 +574,43 @@ function dataKey(userId) {
 
 export function loadCustomerData(userId) {
   const data = readJson(dataKey(userId), null);
-  if (data) return data;
+  if (data) {
+    // Keep cart line prices / seller ids matched to the live catalog.
+    if (Array.isArray(data.cart) && data.cart.length) {
+      data.cart = refreshCartItems(data.cart);
+      writeJson(dataKey(userId), data);
+    }
+    return data;
+  }
   const seeded = seedCustomerData();
   writeJson(dataKey(userId), seeded);
   return seeded;
+}
+
+/**
+ * Reprice cart lines from the current /products catalog so cart totals
+ * match what the farmer sees after checkout.
+ */
+export function refreshCartItems(cart = []) {
+  return cart
+    .map((item) => {
+      const live = getProductById(item.productId);
+      if (!live) return null;
+      const qty = Number(item.qty) || 0;
+      if (qty <= 0) return null;
+      const price = Number(live.price) || 0;
+      return {
+        productId: live.id,
+        name: live.name,
+        price,
+        unit: live.unit || item.unit || "unit",
+        sellerId: live.sellerId || item.sellerId || "demo-seller",
+        sellerName: live.sellerName || item.sellerName || "Farm",
+        qty,
+        lineTotal: price * qty,
+      };
+    })
+    .filter(Boolean);
 }
 
 export function saveCustomerData(userId, data) {
@@ -511,19 +677,30 @@ export function addToCart(userId, productId, qty = 1) {
   const product = getProductById(productId);
   if (!product || !product.available) throw new Error("Product unavailable.");
   const data = loadCustomerData(userId);
+  const addQty = Number(qty) || 1;
+  const price = Number(product.price) || 0;
   const existing = data.cart.find((i) => i.productId === productId);
   if (existing) {
-    existing.qty += qty;
+    existing.qty = (Number(existing.qty) || 0) + addQty;
+    existing.price = price;
+    existing.name = product.name;
+    existing.unit = product.unit;
+    existing.sellerId = product.sellerId || "demo-seller";
+    existing.sellerName = product.sellerName;
+    existing.lineTotal = price * existing.qty;
   } else {
     data.cart.push({
-      productId,
+      productId: product.id,
       name: product.name,
-      price: product.price,
+      price,
       unit: product.unit,
+      sellerId: product.sellerId || "demo-seller",
       sellerName: product.sellerName,
-      qty,
+      qty: addQty,
+      lineTotal: price * addQty,
     });
   }
+  data.cart = refreshCartItems(data.cart);
   saveCustomerData(userId, data);
   return data.cart;
 }
@@ -534,9 +711,10 @@ export function updateCartQty(userId, productId, qty) {
     data.cart = data.cart.filter((i) => i.productId !== productId);
   } else {
     data.cart = data.cart.map((i) =>
-      i.productId === productId ? { ...i, qty } : i
+      i.productId === productId ? { ...i, qty: Number(qty) || 0 } : i
     );
   }
+  data.cart = refreshCartItems(data.cart);
   saveCustomerData(userId, data);
   return data.cart;
 }
@@ -567,26 +745,116 @@ export function placeOrder(userId, { addressId, paymentMethod }) {
   const address = data.addresses.find((a) => a.id === addressId);
   if (!address) throw new Error("Select a delivery address.");
 
-  const total = data.cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  // Always checkout at live catalog prices so seller/orders matches the cart.
+  const items = refreshCartItems(data.cart);
+  if (!items.length) {
+    throw new Error("Your cart is empty or products are unavailable.");
+  }
+
+  for (const item of items) {
+    const live = getProductById(item.productId);
+    if (!live || !live.available) {
+      throw new Error(`${item.name} is out of stock. Update your cart.`);
+    }
+  }
+
+  const total = items.reduce(
+    (sum, i) => sum + Number(i.price) * Number(i.qty),
+    0
+  );
   const order = {
     id: `co-${uid()}`,
-    items: data.cart.map((i) => ({ ...i })),
+    items,
     total,
     paymentMethod,
     status: "PLACED",
     address: { ...address },
     createdAt: new Date().toISOString(),
     ratings: null,
+    customerId: userId,
+    customerName: data.profile?.name || "Customer",
+    customerPhone: data.profile?.phone || address.phone || "",
   };
   data.orders = [order, ...data.orders];
   data.cart = [];
   pushNotification(
     data,
     "Order placed",
-    `Order #${order.id.slice(-6)} placed via ${paymentMethod}. Total ₹${total}.`
+    `Order #${order.id.slice(-8)} placed via ${paymentMethod}. Total ₹${total}.`
   );
   saveCustomerData(userId, data);
+
+  // Forward to farmer portal(s) — delivery only happens after farmer assigns a middleman.
+  import("./sellerStore")
+    .then(({ receiveCustomerOrder }) => {
+      receiveCustomerOrder(order);
+    })
+    .catch(() => {
+      /* seller handoff best-effort in demo */
+    });
+
   return order;
+}
+
+/**
+ * Keep the customer order status in sync with farmer / delivery updates.
+ */
+export function syncCustomerOrderStatus(customerOrderId, status, extra = {}) {
+  if (!customerOrderId || !status) return;
+
+  // Customer orders live under freshfarm_customer_data_<userId>
+  for (let i = 0; i < localStorage.length; i += 1) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith("freshfarm_customer_data_")) continue;
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const data = JSON.parse(raw);
+      if (!Array.isArray(data.orders)) continue;
+      const idx = data.orders.findIndex((o) => o.id === customerOrderId);
+      if (idx < 0) continue;
+      data.orders[idx] = {
+        ...data.orders[idx],
+        status,
+        ...extra,
+      };
+      if (status === "ASSIGNED") {
+        pushNotification(
+          data,
+          "Out for farm pickup",
+          `Order #${customerOrderId.slice(-8)} was assigned to a delivery partner.`
+        );
+      } else if (status === "OUT_FOR_DELIVERY") {
+        pushNotification(
+          data,
+          "Out for delivery",
+          `Order #${customerOrderId.slice(-8)} is on the way.`
+        );
+      } else if (status === "DELIVERED") {
+        pushNotification(
+          data,
+          "Delivered",
+          `Order #${customerOrderId.slice(-8)} was delivered. Enjoy!`
+        );
+      } else if (status === "CONFIRMED") {
+        pushNotification(
+          data,
+          "Order confirmed",
+          `Order #${customerOrderId.slice(-8)} was confirmed by the farm.`
+        );
+      } else if (status === "READY_FOR_PICKUP") {
+        pushNotification(
+          data,
+          "Ready for pickup",
+          `Order #${customerOrderId.slice(-8)} is ready at the farm.`
+        );
+      }
+      writeJson(key, data);
+      return;
+    } catch {
+      /* skip corrupt */
+    }
+  }
 }
 
 export function cancelOrder(userId, orderId) {
@@ -731,7 +999,10 @@ export function cancelSubscription(userId, subId) {
 }
 
 export function cartTotal(cart) {
-  return cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  return refreshCartItems(cart || []).reduce(
+    (sum, i) => sum + Number(i.price) * Number(i.qty),
+    0
+  );
 }
 
 export function unreadCount(notifications) {

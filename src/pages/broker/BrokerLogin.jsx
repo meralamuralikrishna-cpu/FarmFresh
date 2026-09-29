@@ -2,18 +2,18 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-export default function SellerLogin() {
-  const { isSeller, login } = useAuth();
+export default function BrokerLogin() {
+  const { isBroker, loginAsBroker } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
-  if (isSeller) return <Navigate to="/seller" replace />;
+  if (isBroker) return <Navigate to="/broker" replace />;
 
   const enterDemo = () => {
     setError("");
     try {
-      login({ email: "farmer@freshfarm.demo", password: "farmer123" });
-      navigate("/seller");
+      loginAsBroker({ email: "broker@freshfarm.demo", password: "broker123" });
+      navigate("/broker");
     } catch (err) {
       setError(err.message || "Something went wrong.");
     }
@@ -26,11 +26,11 @@ export default function SellerLogin() {
           FreshFarm
         </p>
         <h1 className="mt-1.5 font-display text-[1.55rem] font-extrabold tracking-[-0.03em] text-ink">
-          Farmer sign in
+          Broker sign in
         </h1>
         <p className="mb-5 mt-2 text-[0.95rem] leading-normal text-muted">
-          Set your product prices and submit details to the broker. Manage stock,
-          orders, and deliveries from your farm workspace.
+          Review farmer listings. Farmers set their own product prices before
+          sending details to you.
         </p>
 
         {error ? (
@@ -42,11 +42,11 @@ export default function SellerLogin() {
           className="inline-flex w-full items-center justify-center rounded-full bg-pasture px-5 py-3 text-[0.95rem] font-semibold text-white transition hover:bg-pasture-deep"
           onClick={enterDemo}
         >
-          Continue as demo farmer
+          Continue as demo broker
         </button>
 
         <p className="mt-4 text-[0.82rem] text-muted">
-          No email or password — one click opens the farmer demo.
+          No email or password — one click opens the broker demo.
         </p>
         <Link
           to="/"

@@ -16,18 +16,27 @@ Frontend-only React app. Auth, catalog, orders, deliveries, and admin data are s
 | Role | Login | What you can do |
 |------|--------|-----------------|
 | **Customer** | `/login` | Browse products, cart, wishlist, checkout, orders, subscriptions, addresses, notifications |
-| **Seller / Farmer** | `/seller/login` | Manage products & stock, confirm orders, assign delivery, earnings, reviews |
+| **Farmer** | `/seller/login` | Set product price, submit listings to broker, manage stock & orders, assign delivery, earnings |
+| **Broker** | `/broker/login` | Review farmer submissions (farmer-set prices), accept or reject listings |
 | **Middleman / Delivery** | `/middleman/login` | Accept assigned orders, pickup/delivery status, earnings, profile |
 | **Admin** | `/admin/login` | Users, sellers, middlemen, products, orders, payments, complaints, analytics |
 
 Public pages: home, about, contact, and product browse/detail.
+
+## Farmer → broker flow
+
+1. Farmer signs in and opens **Submit to broker**.
+2. Farmer fills product details and **sets the price**.
+3. On submit, the listing is stored for the farmer and also queued for the broker.
+4. Broker opens **Farmer listings**, sees the farmer’s price, and accepts or rejects.
 
 ## Demo login
 
 Every portal uses one-click demo sign-in — no email or password fields.
 
 - Customer → **Continue as demo customer**
-- Seller → **Continue as demo seller**
+- Farmer → **Continue as demo farmer**
+- Broker → **Continue as demo broker**
 - Delivery → **Continue as demo delivery partner**
 - Admin → **Continue as demo admin**
 

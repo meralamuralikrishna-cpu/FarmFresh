@@ -32,7 +32,9 @@ import {
   getCatalog,
   getProductById,
   searchCatalog,
+  syncAdminApprovedToCatalog,
 } from "../services/customerStore";
+import { loadAdminData } from "../services/adminStore";
 
 const CustomerDataContext = createContext(null);
 
@@ -100,6 +102,12 @@ export function CustomerDataProvider({ children }) {
   );
 
   const value = useMemo(() => {
+    // Admin-approved products appear in the customer shop.
+    try {
+      syncAdminApprovedToCatalog(loadAdminData().products || []);
+    } catch {
+      /* ignore */
+    }
     const catalog = getCatalog();
     if (!data) {
       return {

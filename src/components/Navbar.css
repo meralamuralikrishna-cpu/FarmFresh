@@ -6,18 +6,20 @@
 }
 
 .navbar__inner {
-  max-width: 1120px;
+  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.25rem;
+  flex-wrap: nowrap;
 }
 
 .navbar__brand {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
+  flex-shrink: 0;
 }
 
 .navbar__mark {
@@ -35,19 +37,26 @@
   font-size: 1.35rem;
   font-weight: 800;
   letter-spacing: -0.03em;
+  white-space: nowrap;
 }
 
 .navbar__links {
   display: none;
-  gap: 1.75rem;
-  font-size: 0.95rem;
+  align-items: center;
+  gap: 1.35rem;
+  font-size: 0.92rem;
   font-weight: 500;
   color: var(--muted);
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: center;
 }
 
 .navbar__links a {
   position: relative;
   transition: color 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .navbar__links a:hover,
@@ -58,32 +67,46 @@
 .navbar__actions {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 
 .navbar__login {
   display: none;
+  align-items: center;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   color: var(--muted);
   background: none;
   border: none;
   padding: 0;
+  margin: 0;
   cursor: pointer;
   font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 
+.navbar__login:hover,
 .navbar__logout:hover {
   color: var(--ink);
 }
 
 .navbar__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.65rem 1.1rem;
   border-radius: 999px;
   background: var(--pasture);
   color: #fff;
   font-size: 0.9rem;
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
@@ -100,5 +123,26 @@
   .navbar__links,
   .navbar__login {
     display: flex;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .navbar__links {
+    gap: 0.9rem;
+    font-size: 0.85rem;
+    justify-content: flex-start;
+  }
+
+  .navbar__actions {
+    gap: 0.5rem;
+  }
+
+  .navbar__login {
+    font-size: 0.82rem;
+  }
+
+  .navbar__cta {
+    padding: 0.55rem 0.9rem;
+    font-size: 0.85rem;
   }
 }

@@ -26,7 +26,8 @@ export default function Footer() {
             <Link to="/login">Sign in</Link>
             <Link to="/orders">Orders</Link>
             <Link to="/account/addresses">Addresses</Link>
-            <Link to="/seller/login">Seller portal</Link>
+            <Link to="/seller/login">Farmer portal</Link>
+            <Link to="/broker/login">Broker portal</Link>
             <Link to="/middleman/login">Delivery portal</Link>
             <Link to="/admin/login">Admin</Link>
           </div>

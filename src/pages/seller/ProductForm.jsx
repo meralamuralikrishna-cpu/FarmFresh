@@ -91,10 +91,11 @@ export default function ProductForm() {
       <div className="seller-page__head">
         <div>
           <h1 className="seller-page__title">
-            {isEdit ? "Edit product" : "Add product"}
+            {isEdit ? "Edit product" : "Submit product to broker"}
           </h1>
           <p className="seller-page__lede">
-            Set price, stock, and availability for your dairy listing.
+            You set the selling price. New listings are sent to the broker for
+            review.
           </p>
         </div>
       </div>
@@ -127,7 +128,7 @@ export default function ProductForm() {
 
           <div className="seller-form__row seller-form__row--3">
             <div className="seller-field">
-              <label htmlFor="price">Price (₹)</label>
+              <label htmlFor="price">Your price (₹) — farmer decides</label>
               <input
                 id="price"
                 name="price"
@@ -194,7 +195,7 @@ export default function ProductForm() {
 
           <div className="seller-actions">
             <button type="submit" className="seller-btn seller-btn--primary">
-              {isEdit ? "Save changes" : "Add product"}
+              {isEdit ? "Save changes" : "Submit to broker"}
             </button>
             <Link to="/seller/products" className="seller-btn seller-btn--ghost">
               Cancel

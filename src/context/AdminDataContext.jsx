@@ -14,6 +14,7 @@ import {
   setMiddlemanStatus,
   setProductStatus,
   setSellerStatus,
+  updateAdminProductStock,
 } from "../services/adminStore";
 
 const AdminDataContext = createContext(null);
@@ -50,6 +51,8 @@ export function AdminDataProvider({ children }) {
       approveProduct: (id) => run(() => setProductStatus(id, "approved")),
       rejectProduct: (id) => run(() => setProductStatus(id, "rejected")),
       deleteProduct: (id) => run(() => removeProduct(id)),
+      setProductStock: (id, stock) =>
+        run(() => updateAdminProductStock(id, stock)),
       toggleCustomer: (id, status) => run(() => setCustomerStatus(id, status)),
       toggleMiddleman: (id, status) => run(() => setMiddlemanStatus(id, status)),
       updateComplaint: (id, status) => run(() => setComplaintStatus(id, status)),

@@ -1,6 +1,33 @@
+import {
+  getCatalog,
+  getDefaultCatalogProducts,
+  publishToCatalog,
+  removeFromCatalog,
+  syncAdminApprovedToCatalog,
+} from "./customerStore";
+
 const USERS_KEY = "freshfarm_admin_users";
 const SESSION_KEY = "freshfarm_admin_session";
 const DATA_KEY = "freshfarm_admin_data";
+const ADMIN_DATA_VERSION = 3;
+
+function catalogItemToAdminProduct(p, status = "approved") {
+  return {
+    id: p.id,
+    name: p.name,
+    seller: p.sellerName || p.seller || "Farm",
+    sellerId: p.sellerId || "unknown",
+    category: p.category || "Cow Milk",
+    price: Number(p.price) || 0,
+    unit: p.unit || "litre",
+    stock: Number(p.stock) || 0,
+    description: p.description || "",
+    available: p.available !== false && (Number(p.stock) || 0) > 0,
+    rating: p.rating ?? 0,
+    status,
+    source: p.source || "catalog",
+  };
+}
 
 export const COMPLAINT_STATUSES = ["Open", "In Progress", "Resolved"];
 
@@ -116,48 +143,10 @@ function seedData() {
         deliveries: 35,
       },
     ],
-    products: [
-      {
-        id: "ap1",
-        name: "Fresh Cow Milk",
-        seller: "Green Pasture Dairy",
-        category: "Cow Milk",
-        price: 56,
-        status: "approved",
-      },
-      {
-        id: "ap2",
-        name: "Buffalo Milk",
-        seller: "Green Pasture Dairy",
-        category: "Buffalo Milk",
-        price: 72,
-        status: "approved",
-      },
-      {
-        id: "ap3",
-        name: "Organic Paneer",
-        seller: "Sunrise Dairy",
-        category: "Paneer",
-        price: 350,
-        status: "pending",
-      },
-      {
-        id: "ap4",
-        name: "Village Ghee",
-        seller: "Hilltop Farms",
-        category: "Ghee",
-        price: 720,
-        status: "approved",
-      },
-      {
-        id: "ap5",
-        name: "Spiced Buttermilk",
-        seller: "Sunrise Dairy",
-        category: "Buttermilk",
-        price: 35,
-        status: "pending",
-      },
-    ],
+    // Same products as customer /products catalog (ids c1–c8).
+    products: getDefaultCatalogProducts().map((p) =>
+      catalogItemToAdminProduct(p, "approved")
+    ),
     orders: [
       {
         id: "ao1",
@@ -399,12 +388,135 @@ export function getAdminSession() {
   return readJson(SESSION_KEY, null);
 }
 
+/**
+ * Keep Admin → Products aligned with the live customer catalog, while
+ * preserving pending/rejected broker requests for admin review.
+ */
+function alignAdminProductsWithCatalog(data) {
+  // Drop legacy demo catalog entries (ap*) that never matched /products seed.
+  try {
+    const catalog = getCatalog().filter((p) => !String(p.id).startsWith("ap"));
+    localStorage.setItem("freshfarm_catalog", JSON.stringify(catalog));
+  } catch {
+    /* ignore */
+  }
+
+  const catalog = getCatalog();
+  const byId = new Map((data.products || []).map((p) => [p.id, p]));
+
+  // Drop legacy demo ids (ap*) that are not in the shop and not broker-sourced.
+  for (const [id, p] of [...byId.entries()]) {
+    const isLegacySeed = String(id).startsWith("ap");
+    const inCatalog = catalog.some((c) => c.id === id);
+    if (isLegacySeed && !inCatalog && p.source !== "broker") {
+      byId.delete(id);
+    }
+  }
+
+  // Every catalog item must appear in admin (approved / live).
+  for (const c of catalog) {
+    const existing = byId.get(c.id);
+    if (!existing) {
+      byId.set(c.id, catalogItemToAdminProduct(c, "approved"));
+      continue;
+    }
+    // Refresh live fields from catalog when already approved.
+    if (existing.status === "approved") {
+      byId.set(c.id, {
+        ...existing,
+        ...catalogItemToAdminProduct(c, "approved"),
+        source: existing.source || "catalog",
+      });
+    }
+  }
+
+  // Pending broker requests first, then live catalog products.
+  const products = [...byId.values()].sort((a, b) => {
+    if (a.status === "pending" && b.status !== "pending") return -1;
+    if (b.status === "pending" && a.status !== "pending") return 1;
+    return String(a.name).localeCompare(String(b.name));
+  });
+
+  data.products = products;
+  data._version = ADMIN_DATA_VERSION;
+  return data;
+}
+
 export function loadAdminData() {
-  const data = readJson(dataKey(), null);
-  if (data) return data;
-  const seeded = seedData();
-  writeJson(dataKey(), seeded);
-  return seeded;
+  let data = readJson(dataKey(), null);
+  if (!data) {
+    data = seedData();
+    data._version = ADMIN_DATA_VERSION;
+    writeJson(dataKey(), data);
+  }
+
+  const needsAlign =
+    data._version !== ADMIN_DATA_VERSION ||
+    !(data.products || []).some((p) => String(p.id).startsWith("c"));
+
+  // Pull any broker-accepted farmer listings into Admin → Products.
+  try {
+    const raw = localStorage.getItem("freshfarm_broker_submissions");
+    if (raw) {
+      const submissions = JSON.parse(raw);
+      if (Array.isArray(submissions) && submissions.length) {
+        mergeBrokerAcceptedIntoAdmin(data, submissions);
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  if (needsAlign) {
+    alignAdminProductsWithCatalog(data);
+  }
+
+  // Approved admin products stay published on /products.
+  try {
+    syncAdminApprovedToCatalog(data.products || []);
+  } catch {
+    /* ignore */
+  }
+
+  writeJson(dataKey(), data);
+  return data;
+}
+
+function readAdminDataRaw() {
+  let data = readJson(dataKey(), null);
+  if (!data) {
+    data = seedData();
+    writeJson(dataKey(), data);
+  }
+  return data;
+}
+
+function mergeBrokerAcceptedIntoAdmin(data, submissions = []) {
+  const existing = new Set(data.products.map((p) => p.id));
+  let changed = false;
+
+  for (const item of submissions) {
+    if (item.status !== "accepted" || !item.productId || !item.product) continue;
+    if (existing.has(item.productId)) continue;
+    data.products.unshift({
+      id: item.productId,
+      name: item.product.name,
+      seller: item.farmName || item.farmerName || "Farm",
+      sellerId: item.farmerId,
+      category: item.product.type || "Cow Milk",
+      price: Number(item.product.price) || 0,
+      unit: item.product.unit || "litre",
+      stock: Number(item.product.stock) || 0,
+      description: item.product.description || "",
+      status: "pending",
+      source: "broker",
+      submittedAt: item.submittedAt || new Date().toISOString(),
+    });
+    existing.add(item.productId);
+    changed = true;
+  }
+
+  return changed;
 }
 
 export function saveAdminData(data) {
@@ -421,16 +533,131 @@ export function setSellerStatus(sellerId, status) {
 
 export function setProductStatus(productId, status) {
   const data = loadAdminData();
+  const product = data.products.find((p) => p.id === productId);
   data.products = data.products.map((p) =>
-    p.id === productId ? { ...p, status } : p
+    p.id === productId
+      ? {
+          ...p,
+          status,
+          reviewedAt: new Date().toISOString(),
+        }
+      : p
   );
   saveAdminData(data);
+
+  if (product) {
+    if (status === "approved") {
+      // Admin approval publishes the listing to the customer shop.
+      publishToCatalog({
+        productId: product.id,
+        farmerId: product.sellerId || "unknown",
+        farmerName: product.seller,
+        farmName: product.seller,
+        product: {
+          name: product.name,
+          type: product.category,
+          category: product.category,
+          price: product.price,
+          unit: product.unit || "litre",
+          stock: product.stock ?? 0,
+          available: true,
+          description: product.description || "",
+        },
+      });
+    } else if (status === "rejected") {
+      removeFromCatalog(productId);
+    }
+  }
+}
+
+/**
+ * After broker accepts a farmer listing, queue it for admin review.
+ */
+export function queueBrokerAcceptedProduct(submission) {
+  const data = readAdminDataRaw();
+  const id = submission.productId;
+  const next = {
+    id,
+    name: submission.product?.name || "Product",
+    seller: submission.farmName || submission.farmerName || "Farm",
+    sellerId: submission.farmerId,
+    category: submission.product?.type || "Cow Milk",
+    price: Number(submission.product?.price) || 0,
+    unit: submission.product?.unit || "litre",
+    stock: Number(submission.product?.stock) || 0,
+    description: submission.product?.description || "",
+    status: "pending",
+    source: "broker",
+    submittedAt: submission.submittedAt || new Date().toISOString(),
+  };
+
+  const idx = data.products.findIndex((p) => p.id === id);
+  if (idx >= 0) {
+    // Keep admin decision if already reviewed; otherwise refresh pending details.
+    if (data.products[idx].status === "pending") {
+      data.products[idx] = { ...data.products[idx], ...next };
+    }
+  } else {
+    data.products = [next, ...data.products];
+  }
+  saveAdminData(data);
+  return next;
+}
+
+/**
+ * Backfill admin Products with broker-accepted listings that are missing.
+ */
+export function syncBrokerAcceptedToAdmin(submissions = []) {
+  const data = readAdminDataRaw();
+  const changed = mergeBrokerAcceptedIntoAdmin(data, submissions);
+  if (changed) saveAdminData(data);
+  return data;
 }
 
 export function removeProduct(productId) {
   const data = loadAdminData();
   data.products = data.products.filter((p) => p.id !== productId);
   saveAdminData(data);
+  removeFromCatalog(productId);
+}
+
+export function updateAdminProductStock(productId, stock) {
+  const qty = Math.max(0, Number(stock) || 0);
+  const data = loadAdminData();
+  const product = data.products.find((p) => p.id === productId);
+  if (!product) throw new Error("Product not found.");
+
+  data.products = data.products.map((p) =>
+    p.id === productId
+      ? {
+          ...p,
+          stock: qty,
+          available: qty > 0,
+        }
+      : p
+  );
+  saveAdminData(data);
+
+  if (product.status === "approved") {
+    publishToCatalog({
+      productId: product.id,
+      farmerId: product.sellerId || "unknown",
+      farmerName: product.seller,
+      farmName: product.seller,
+      product: {
+        name: product.name,
+        type: product.category,
+        category: product.category,
+        price: product.price,
+        unit: product.unit || "litre",
+        stock: qty,
+        available: qty > 0,
+        description: product.description || "",
+      },
+    });
+  }
+
+  return data.products.find((p) => p.id === productId);
 }
 
 export function setCustomerStatus(customerId, status) {

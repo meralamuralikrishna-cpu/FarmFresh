@@ -26,7 +26,10 @@ export default function Home() {
               Order milk
             </Button>
             <Button as={Link} to="/seller/login" variant="ghost">
-              Sell with FreshFarm
+              Farmer portal
+            </Button>
+            <Button as={Link} to="/broker/login" variant="ghost">
+              Broker portal
             </Button>
             <Button as={Link} to="/middleman/login" variant="ghost">
               Deliver with us

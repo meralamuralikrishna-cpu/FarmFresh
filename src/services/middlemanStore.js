@@ -278,6 +278,7 @@ export function advanceDeliveryStatus(userId, orderId) {
   if (next === "PICKED_UP") order.pickupTime = new Date().toISOString();
   if (next === "DELIVERED") order.deliveryTime = new Date().toISOString();
   saveMiddlemanData(userId, data);
+  syncDeliveryBackToSeller(order);
   return order;
 }
 
@@ -290,7 +291,170 @@ export function markDeliveryFailed(userId, orderId) {
   }
   order.status = "FAILED";
   saveMiddlemanData(userId, data);
+  syncDeliveryBackToSeller(order);
   return order;
+}
+
+/**
+ * Farmer assigned a ready order → show it in the delivery portal.
+ */
+export function receiveAssignedOrder({
+  portalUserId,
+  email,
+  phone,
+  sellerId,
+  sellerProfile,
+  order,
+}) {
+  const portalId = resolvePortalUserId({ portalUserId, email, phone });
+  ensurePortalUser({
+    id: portalId,
+    email,
+    phone,
+  });
+
+  const data = loadMiddlemanData(portalId);
+  if (data.orders.some((o) => o.orderRef === order.id || o.sellerOrderId === order.id)) {
+    return data.orders.find(
+      (o) => o.orderRef === order.id || o.sellerOrderId === order.id
+    );
+  }
+
+  const earning = Math.max(25, Math.round((Number(order.total) || 0) * 0.12));
+  const entry = {
+    id: uid(),
+    orderRef: order.id,
+    sellerOrderId: order.id,
+    sellerId,
+    customerName: order.customerName || "Customer",
+    customerPhone: order.phone || "",
+    address: order.address || "",
+    sellerName: sellerProfile?.farmName || "Farm",
+    sellerAddress: sellerProfile?.address || "",
+    sellerPhone: sellerProfile?.phone || "",
+    items: (order.items || []).map((i) => ({
+      name: i.name,
+      qty: i.qty,
+      unit: i.unit || "unit",
+    })),
+    total: Number(order.total) || 0,
+    status: "ASSIGNED",
+    assignedAt: new Date().toISOString(),
+    pickupTime: null,
+    deliveryTime: null,
+    earning,
+  };
+
+  data.orders = [entry, ...data.orders];
+  saveMiddlemanData(portalId, data);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("freshfarm:middleman-orders-updated", {
+        detail: { middlemanId: portalId, orderId: entry.id },
+      })
+    );
+  }
+  return entry;
+}
+
+function resolvePortalUserId({ portalUserId, email, phone }) {
+  if (portalUserId) return portalUserId;
+
+  const users = getUsers();
+  if (email) {
+    const byEmail = users.find(
+      (u) => u.email?.toLowerCase() === String(email).toLowerCase()
+    );
+    if (byEmail) return byEmail.id;
+  }
+  if (phone) {
+    const byPhone = users.find((u) => u.phone === phone);
+    if (byPhone) return byPhone.id;
+  }
+  return `portal-${String(phone || email || "unknown").replace(/\W+/g, "")}`;
+}
+
+function ensurePortalUser({ id, email, phone }) {
+  let users = getUsers();
+  if (users.some((u) => u.id === id)) return;
+
+  // Keep demo delivery account available for m1 assignments.
+  if (id === "demo-middleman") {
+    users = [
+      ...users,
+      {
+        id: "demo-middleman",
+        name: "Suresh Delivery",
+        email: email || "delivery@freshfarm.demo",
+        phone: phone || "9000011111",
+        password: "delivery123",
+        area: "Anand East",
+        vehicle: "Bike — GJ-01-AB-1234",
+        role: "middleman",
+      },
+    ];
+    writeJson(USERS_KEY, users);
+    return;
+  }
+
+  users = [
+    ...users,
+    {
+      id,
+      name: "Delivery Partner",
+      email: email || `${id}@freshfarm.demo`,
+      phone: phone || "",
+      password: "delivery123",
+      area: "",
+      vehicle: "",
+      role: "middleman",
+    },
+  ];
+  writeJson(USERS_KEY, users);
+}
+
+function syncDeliveryBackToSeller(deliveryOrder) {
+  if (!deliveryOrder?.sellerId || !deliveryOrder?.sellerOrderId) return;
+
+  const sellerKey = `freshfarm_seller_data_${deliveryOrder.sellerId}`;
+  const sellerData = readJson(sellerKey, null);
+  if (!sellerData?.orders) return;
+
+  const sellerStatus =
+    deliveryOrder.status === "DELIVERED"
+      ? "DELIVERED"
+      : deliveryOrder.status === "OUT_FOR_DELIVERY"
+        ? "OUT_FOR_DELIVERY"
+        : deliveryOrder.status === "FAILED"
+          ? "ASSIGNED"
+          : "ASSIGNED";
+
+  let customerOrderId = deliveryOrder.sellerOrderId;
+  sellerData.orders = sellerData.orders.map((o) => {
+    if (o.id !== deliveryOrder.sellerOrderId) return o;
+    customerOrderId = o.customerOrderId || o.id;
+    return {
+      ...o,
+      status: sellerStatus,
+      ...(sellerStatus === "DELIVERED"
+        ? { deliveredAt: new Date().toISOString() }
+        : {}),
+    };
+  });
+  writeJson(sellerKey, sellerData);
+
+  // Mirror onto the customer order so /orders updates too.
+  try {
+    import("./customerStore").then(({ syncCustomerOrderStatus }) => {
+      syncCustomerOrderStatus(customerOrderId, sellerStatus, {
+        ...(sellerStatus === "DELIVERED"
+          ? { deliveredAt: new Date().toISOString() }
+          : {}),
+      });
+    });
+  } catch {
+    /* ignore */
+  }
 }
 
 export function getMiddlemanEarnings(data) {

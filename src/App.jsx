@@ -54,6 +54,13 @@ import AdminPayments from "./pages/admin/Payments";
 import AdminComplaints from "./pages/admin/Complaints";
 import AdminAnalytics from "./pages/admin/Analytics";
 
+import BrokerLogin from "./pages/broker/BrokerLogin";
+import BrokerLayout from "./pages/broker/BrokerLayout";
+import RequireBroker from "./pages/broker/RequireBroker";
+import BrokerDashboard from "./pages/broker/Dashboard";
+import BrokerSubmissions from "./pages/broker/Submissions";
+import BrokerProfile from "./pages/broker/Profile";
+
 export default function App() {
   return (
     <Routes>
@@ -127,6 +134,15 @@ export default function App() {
           <Route path="payments" element={<AdminPayments />} />
           <Route path="complaints" element={<AdminComplaints />} />
           <Route path="analytics" element={<AdminAnalytics />} />
+        </Route>
+      </Route>
+
+      <Route path="/broker/login" element={<BrokerLogin />} />
+      <Route element={<RequireBroker />}>
+        <Route path="/broker" element={<BrokerLayout />}>
+          <Route index element={<BrokerDashboard />} />
+          <Route path="submissions" element={<BrokerSubmissions />} />
+          <Route path="profile" element={<BrokerProfile />} />
         </Route>
       </Route>
     </Routes>

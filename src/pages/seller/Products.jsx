@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useSellerData } from "../../context/SellerDataContext";
+import { BROKER_STATUS_LABELS } from "../../services/sellerStore";
 
 function formatINR(n) {
   return `₹${Number(n).toLocaleString("en-IN")}`;
@@ -24,17 +25,18 @@ export default function Products() {
         <div>
           <h1 className="seller-page__title">Product management</h1>
           <p className="seller-page__lede">
-            Add, edit, price, stock, and availability for dairy products.
+            Change the <strong>Stock</strong> number to restock (Fresh Cow Milk,
+            Buffalo Milk, Ghee, etc.). That updates the customer shop too.
           </p>
         </div>
         <Link to="/seller/products/new" className="seller-btn seller-btn--primary">
-          Add product
+          Submit to broker
         </Link>
       </div>
 
       <div className="seller-panel">
         {products.length === 0 ? (
-          <p className="seller-empty">No products yet. Add your first listing.</p>
+          <p className="seller-empty">No products yet. Submit your first listing.</p>
         ) : (
           <div className="seller-table-wrap">
             <table className="seller-table">
@@ -42,8 +44,9 @@ export default function Products() {
                 <tr>
                   <th>Product</th>
                   <th>Type</th>
-                  <th>Price</th>
+                  <th>Your price</th>
                   <th>Stock</th>
+                  <th>Broker</th>
                   <th>Availability</th>
                   <th>Actions</th>
                 </tr>
@@ -90,11 +93,40 @@ export default function Products() {
                           border: "1.5px solid var(--line)",
                           borderRadius: "8px",
                           font: "inherit",
+                          background:
+                            Number(p.stock) <= 0 ? "rgba(180,80,40,0.08)" : undefined,
                         }}
                         onChange={(e) =>
-                          editProduct(p.id, { stock: Number(e.target.value) || 0 })
+                          editProduct(p.id, {
+                            stock: Number(e.target.value) || 0,
+                          })
                         }
                       />
+                      {Number(p.stock) <= 0 ? (
+                        <div
+                          style={{
+                            color: "#8a5a12",
+                            fontSize: "0.75rem",
+                            marginTop: "0.2rem",
+                          }}
+                        >
+                          Out of stock — type a qty
+                        </div>
+                      ) : null}
+                    </td>
+                    <td>
+                      <span
+                        className={`seller-badge ${
+                          p.brokerStatus === "accepted"
+                            ? "seller-badge--ok"
+                            : p.brokerStatus === "rejected"
+                              ? "seller-badge--muted"
+                              : ""
+                        }`}
+                      >
+                        {BROKER_STATUS_LABELS[p.brokerStatus] ||
+                          BROKER_STATUS_LABELS.pending}
+                      </span>
                     </td>
                     <td>
                       <button
@@ -132,9 +164,8 @@ export default function Products() {
           </div>
         )}
         <p style={{ margin: "1rem 0 0", color: "var(--muted)", fontSize: "0.85rem" }}>
-          Catalog types: Cow Milk, Buffalo Milk, Curd, Paneer, Ghee, Buttermilk.
-          Inline price/stock edits save immediately. Listed prices show as{" "}
-          {products[0] ? formatINR(products[0].price) : "₹…"} style amounts.
+          Farmer sets the price. After submit, the broker reviews the listing.
+          Example amount: {products[0] ? formatINR(products[0].price) : "₹…"}.
         </p>
       </div>
     </div>

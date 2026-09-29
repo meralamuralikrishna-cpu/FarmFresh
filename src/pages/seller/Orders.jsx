@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { useSellerData } from "../../context/SellerDataContext";
 import {
@@ -105,7 +106,11 @@ export default function Orders() {
                     </td>
                     <td>
                       {o.items
-                        .map((i) => `${i.name} × ${i.qty}`)
+                        .map((i) => {
+                          const unitPrice = formatINR(i.price);
+                          const unit = i.unit ? `/${i.unit}` : "";
+                          return `${i.name} × ${i.qty} (${unitPrice}${unit} each)`;
+                        })
                         .join(", ")}
                     </td>
                     <td>{formatINR(o.total)}</td>
@@ -130,11 +135,18 @@ export default function Orders() {
                           {ACTION_LABEL[o.status]}
                         </button>
                       ) : (
-                        <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                          {o.status === "READY_FOR_PICKUP"
-                            ? "Assign in Delivery"
-                            : "—"}
-                        </span>
+                        o.status === "READY_FOR_PICKUP" ? (
+                          <Link
+                            to="/seller/deliveries"
+                            className="seller-btn seller-btn--ghost"
+                          >
+                            Assign in Delivery
+                          </Link>
+                        ) : (
+                          <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
+                            —
+                          </span>
+                        )
                       )}
                     </td>
                   </tr>
