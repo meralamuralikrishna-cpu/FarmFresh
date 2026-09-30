@@ -1,242 +1,207 @@
-# FreshFarm — Full Project Workflow
+# FreshFarm — Presentation Workflow
 
-Frontend-only React demo. All auth and data live in `localStorage` (no real backend).
+**Milk Selling Platform** · Frontend demo (React) · Role-based portals
 
----
-
-## Roles at a glance
-
-| Role | Portal | Job |
-|------|--------|-----|
-| **Customer** | `/login` | Buy dairy products |
-| **Farmer (Seller)** | `/seller/login` | List products (set price), manage orders, assign delivery |
-| **Broker** | `/broker/login` | Review / accept / reject farmer listings |
-| **Middleman** | `/middleman/login` | Pick up and deliver assigned orders |
-| **Admin** | `/admin/login` | Oversee users, products, orders, payments, complaints |
+> Use this doc as a **presentation script**: walk top → bottom. Each section is one slide idea.
 
 ---
 
-## End-to-end business flow
+## Slide 1 — What is FreshFarm?
+
+A farm-to-home dairy marketplace where:
+
+- **Farmers** list milk & dairy products
+- **Brokers** review listings before they go live
+- **Admins** approve products for the shop
+- **Customers** buy and track orders
+- **Middlemen** pick up and deliver
+
+**Tech note (one line):** Frontend-only React demo — auth & data in `localStorage` (no live backend).
+
+---
+
+## Slide 2 — Who uses the system?
+
+| Role | Portal | One-line job |
+|------|--------|--------------|
+| Customer | `/login` | Browse, cart, checkout, track orders |
+| Farmer (Seller) | `/seller/login` | List products, manage orders, assign delivery |
+| Broker | `/broker/login` | Accept or reject farmer listings |
+| Middleman | `/middleman/login` | Pick up & deliver assigned orders |
+| Admin | `/admin/login` | Oversee users, products, orders, payments |
+
+---
+
+## Slide 3 — Big picture (end-to-end)
 
 ```
-Farmer submits product (sets price)
-        │
-        ▼
-Broker accepts or rejects listing
-        │  (accepted)
-        ▼
-Admin → Products (pending review)
-        │  (admin approves)
-        ▼
-Customer browses → cart → checkout → order PLACED
-        │
-        ▼
-Farmer advances order:
-  PLACED → CONFIRMED → PREPARING → READY_FOR_PICKUP
-        │
-        ▼
-Farmer assigns a middleman → ASSIGNED
-        │
-        ▼
-Middleman:
-  ASSIGNED → ACCEPTED → PICKED_UP → OUT_FOR_DELIVERY → DELIVERED
-        │
-        ▼
-Customer sees delivered order (can review / subscribe)
-Admin can monitor everything across portals
+   FARMER                    BROKER                   ADMIN
+  submits product  ──────►  accept / reject  ──────►  approve / reject
+  (sets price)              listing                  for customer shop
+                                                        │
+                                                        ▼
+                                                   CUSTOMER
+                                              browse → cart → checkout
+                                              order = PLACED
+                                                        │
+                                                        ▼
+                                                   FARMER
+                                    confirm → prepare → ready for pickup
+                                    assign middleman
+                                                        │
+                                                        ▼
+                                                  MIDDLEMAN
+                                    accept → pick up → out for delivery
+                                    → DELIVERED
+                                                        │
+                                                        ▼
+                                                   CUSTOMER
+                                              receives order / can review
 ```
 
----
-
-## 1. Farmer → Broker → Admin (product listing)
-
-1. Farmer signs in at `/seller/login`.
-2. Opens **Submit to broker** (`/seller/products/new`).
-3. Fills product details and **sets the selling price**.
-4. On submit:
-   - Product is saved on the farmer side with `brokerStatus: "pending"`.
-   - Same listing is queued in the broker store (`brokerStore.submitFarmerListing`).
-5. Broker signs in at `/broker/login`.
-6. Opens **Submissions** (`/broker/submissions`).
-7. Sees farmer name, product, and farmer-set price.
-8. **Accept** or **Reject**:
-   - Broker submission status updates.
-   - Farmer product `brokerStatus` syncs to `accepted` or `rejected`.
-   - On **Accept**, the listing is sent to **Admin → Products** (`/admin/products`) as `pending`.
-9. Admin reviews at `/admin/products`:
-   - **Approve** → product is published to the customer shop (`/products`).
-   - **Reject / Remove** → product stays off the customer catalog.
-
-**Broker pages**
-
-| Route | Purpose |
-|-------|---------|
-| `/broker/login` | Demo broker sign-in |
-| `/broker` | Dashboard (pending / accepted / rejected counts) |
-| `/broker/submissions` | Review listings |
-| `/broker/profile` | Broker profile |
-
-**Farmer product pages**
-
-| Route | Purpose |
-|-------|---------|
-| `/seller` | Dashboard |
-| `/seller/products` | Product list + broker status badges |
-| `/seller/products/new` | Submit new listing to broker |
-| `/seller/products/:id/edit` | Edit product |
+**Story in one sentence:** Farmer lists → Broker & Admin approve → Customer buys → Farmer prepares → Middleman delivers.
 
 ---
 
-## 2. Customer shopping flow
+## Slide 4 — Product listing workflow
 
-1. Browse public catalog: `/products`, `/products/:productId`.
-2. Sign in at `/login` (required for cart / checkout / account).
-3. Add items to cart (`/cart`) or wishlist (`/wishlist`).
-4. Checkout (`/checkout`) — payment is simulated.
-5. Order is created with status **`PLACED`**.
-6. Customer can track orders (`/orders`, `/orders/:orderId`), manage addresses, subscriptions, and notifications.
+**Goal:** Only quality listings reach the customer shop.
 
-**Customer routes**
+```
+Farmer                    Broker                     Admin                  Shop
+──────                    ──────                     ─────                  ────
+Submit product
++ selling price
+       │
+       ▼
+  brokerStatus:
+  "pending"  ──────────►  Review submission
+                          Accept / Reject
+                               │
+                    (on Accept)│
+                               ▼
+                          Queued as pending ───► Approve / Reject
+                                                      │
+                                           (on Approve)│
+                                                       ▼
+                                                  Live on /products
+```
 
-| Route | Purpose |
-|-------|---------|
-| `/` | Home |
-| `/products` | Catalog |
-| `/products/:productId` | Product detail |
-| `/login` | Customer login |
-| `/cart` | Cart |
-| `/checkout` | Checkout |
-| `/orders` | Order list |
-| `/orders/:orderId` | Order detail |
-| `/account` | Profile |
-| `/account/addresses` | Addresses |
-| `/wishlist` | Wishlist |
-| `/subscription` | Subscriptions |
-| `/notifications` | Notifications |
-| `/about`, `/contact` | Public info |
+**Demo path**
+
+1. Farmer → `/seller/login` → **Submit to broker** (`/seller/products/new`)
+2. Broker → `/broker/login` → **Submissions** → Accept
+3. Admin → `/admin/login` → **Products** → Approve
+4. Customer sees it on `/products`
 
 ---
 
-## 3. Farmer order & delivery assignment
+## Slide 5 — Customer shopping workflow
 
-After a customer places an order, the farmer manages it in `/seller/orders`.
+```
+Browse catalog (/products)
+        │
+        ▼
+Sign in (/login)
+        │
+        ▼
+Add to cart / wishlist
+        │
+        ▼
+Checkout (payment simulated)
+        │
+        ▼
+Order created → status: PLACED
+        │
+        ▼
+Track order · addresses · subscriptions · notifications
+```
 
-**Farmer order status chain**
+**Key pages:** Home → Products → Cart → Checkout → Orders
+
+---
+
+## Slide 6 — Order & delivery lifecycle
+
+### Farmer side
 
 ```
 PLACED → CONFIRMED → PREPARING → READY_FOR_PICKUP → ASSIGNED
-                                                      │
-                                                      └─ then middleman takes over
 ```
 
-1. Farmer confirms and prepares the order.
-2. Marks it **Ready for Pickup**.
-3. Assigns a middleman (`assignMiddleman`) → status becomes **`ASSIGNED`**.
-4. Farmer can also view deliveries, earnings, and reviews.
-
-**Farmer ops pages**
-
-| Route | Purpose |
-|-------|---------|
-| `/seller/orders` | Advance order status |
-| `/seller/deliveries` | Delivery overview |
-| `/seller/earnings` | Earnings |
-| `/seller/reviews` | Reviews |
-| `/seller/profile` | Farm profile |
-
----
-
-## 4. Middleman delivery flow
-
-1. Middleman signs in at `/middleman/login`.
-2. Sees assigned orders (`/middleman/assigned`).
-3. Advances delivery status:
+### Middleman side
 
 ```
 ASSIGNED → ACCEPTED → PICKED_UP → OUT_FOR_DELIVERY → DELIVERED
+                                                      (or FAILED)
 ```
 
-(Failed deliveries can be marked **FAILED**.)
+### Combined story
 
-4. Pickup / deliveries screens support the same lifecycle.
-5. Earnings and profile are available after deliveries.
-
-**Middleman routes**
-
-| Route | Purpose |
-|-------|---------|
-| `/middleman/login` | Demo delivery sign-in |
-| `/middleman` | Dashboard |
-| `/middleman/assigned` | Assigned orders |
-| `/middleman/pickup` | Pickup |
-| `/middleman/deliveries` | Deliveries |
-| `/middleman/earnings` | Earnings |
-| `/middleman/profile` | Profile |
+| Step | Who | Action |
+|------|-----|--------|
+| 1 | Customer | Places order |
+| 2 | Farmer | Confirms & prepares |
+| 3 | Farmer | Marks ready, assigns middleman |
+| 4 | Middleman | Accepts, picks up, delivers |
+| 5 | Customer | Sees **Delivered**; can review |
 
 ---
 
-## 5. Admin oversight
+## Slide 7 — Role interactions (who talks to whom)
 
-Admin signs in at `/admin/login` and monitors the platform (demo data in `adminStore`).
-
-| Route | Purpose |
-|-------|---------|
-| `/admin` | Dashboard |
-| `/admin/users` | Customers / users |
-| `/admin/sellers` | Farmers |
-| `/admin/middlemen` | Delivery partners |
-| `/admin/products` | Products |
-| `/admin/orders` | Orders |
-| `/admin/payments` | Payments |
-| `/admin/complaints` | Complaints |
-| `/admin/analytics` | Analytics |
-
----
-
-## Data & auth (how it works technically)
-
-```
-src/
-  pages/          # UI per role
-  context/        # AuthContext + role data providers
-  services/       # localStorage stores
-    customerStore.js
-    sellerStore.js
-    brokerStore.js
-    middlemanStore.js
-    adminStore.js
-```
-
-- Each role has its own session key in `localStorage`.
-- `AuthContext` tracks who is signed in (customer / seller / broker / middleman / admin).
-- Route guards (`RequireSeller`, `RequireBroker`, `RequireMiddleman`, `RequireCustomer`, `RequireAdmin`) block portals without a session.
-- Farmer product submit calls into `brokerStore` so broker and farmer stay in sync on accept/reject.
-
----
-
-## Demo sign-in
-
-Every portal uses one-click demo login (no real email/password required in the UI):
-
-- Customer → Continue as demo customer  
-- Farmer → Continue as demo farmer  
-- Broker → Continue as demo broker  
-- Middleman → Continue as demo delivery partner  
-- Admin → Continue as demo admin  
-
-Clearing site storage resets all demo data.
-
----
-
-## Quick map: who talks to whom
-
-| From | To | Interaction |
-|------|----|-------------|
+| From | To | What happens |
+|------|----|--------------|
 | Farmer | Broker | Submits product + price for review |
-| Broker | Admin | Accepts listing → queues in Admin → Products |
-| Admin | Customer shop | Approves product → publishes to `/products` |
-| Broker | Farmer | Accepts / rejects listing (status sync) |
-| Customer | Farmer | Places order for products |
+| Broker | Farmer | Accept / reject (status sync) |
+| Broker | Admin | Accepted listing goes to Admin → Products |
+| Admin | Shop | Approve → product appears for customers |
+| Customer | Farmer | Places order |
 | Farmer | Middleman | Assigns ready order for delivery |
-| Middleman | Customer | Picks up and delivers order |
-| Admin | Everyone | Oversees users, catalog, orders, payments, complaints |
+| Middleman | Customer | Delivers the order |
+| Admin | Everyone | Monitors users, catalog, orders, payments, complaints |
+
+---
+
+## Slide 8 — Portals at a glance (for live demo)
+
+| Portal | Start here | Show next |
+|--------|------------|-----------|
+| Farmer | `/seller/login` | Products → Orders → Assign delivery |
+| Broker | `/broker/login` | Dashboard → Submissions |
+| Admin | `/admin/login` | Products → Orders → Analytics |
+| Customer | `/login` | Products → Cart → Checkout → Orders |
+| Middleman | `/middleman/login` | Assigned → Pickup → Deliveries |
+
+**Demo tip:** Every portal has one-click demo login (no real password needed). Clear site storage to reset demo data.
+
+---
+
+## Slide 9 — How it works under the hood (short)
+
+```
+React pages (per role)
+        │
+        ▼
+AuthContext + role data providers
+        │
+        ▼
+localStorage stores
+  customerStore · sellerStore · brokerStore
+  middlemanStore · adminStore
+```
+
+- Each role has its own session in `localStorage`
+- Route guards protect each portal (`RequireSeller`, `RequireBroker`, …)
+- Farmer submit syncs into `brokerStore` so accept/reject stays consistent
+
+---
+
+## Slide 10 — Closing / takeaways
+
+1. **Multi-role dairy marketplace** — farmer → broker → admin → customer → middleman  
+2. **Clear approval chain** before products go live  
+3. **Full order lifecycle** from place to deliver  
+4. **Presentation-ready demo** with one-click role logins  
+
+**Tagline:** *From farm listing to doorstep delivery — in one workflow.*
