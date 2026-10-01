@@ -18,7 +18,7 @@ export default function Dashboard() {
       <div className="seller-page__head">
         <div>
           <h1 className="seller-page__title">
-            Hi, {profile?.name?.split(" ")[0] || "Broker"}
+            Hi, {profile?.name?.split(" ")[0] || "Reviewer"}
           </h1>
           <p className="seller-page__lede">
             Farmers submit product details with their own prices. Review and

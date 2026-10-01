@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import freshFarmLogo from "../assets/FreshFarmlogo-clean.png";
 import "./Footer.css";
 
 export default function Footer() {
@@ -6,7 +7,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer__inner">
         <div className="footer__brand">
-          <span className="footer__name">FreshFarm</span>
+          <img className="footer__logo" src={freshFarmLogo} alt="FreshFarm" />
           <p>Fresh dairy from nearby farms, delivered on your schedule.</p>
         </div>
 
@@ -27,7 +28,7 @@ export default function Footer() {
             <Link to="/orders">Orders</Link>
             <Link to="/account/addresses">Addresses</Link>
             <Link to="/seller/login">Farmer portal</Link>
-            <Link to="/broker/login">Broker portal</Link>
+            <Link to="/broker/login">Product Reviewer portal</Link>
             <Link to="/middleman/login">Delivery portal</Link>
             <Link to="/admin/login">Admin</Link>
           </div>

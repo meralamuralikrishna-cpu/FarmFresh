@@ -90,7 +90,7 @@ export function AuthProvider({ children }) {
       id: session.userId,
       email: session.email,
       role: session.role,
-      name: profile?.name || "Broker",
+      name: profile?.name || "Product Reviewer",
     };
   });
 
@@ -180,7 +180,7 @@ export function AuthProvider({ children }) {
     const profile = getBrokerProfile();
     const next = {
       ...loggedIn,
-      name: profile?.name || loggedIn.name || "Broker",
+      name: profile?.name || loggedIn.name || "Product Reviewer",
     };
     setBroker(next);
     return next;

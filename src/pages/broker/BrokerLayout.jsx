@@ -28,7 +28,7 @@ function BrokerShell() {
         <div className="seller-sidebar__brand">
           <span className="seller-sidebar__mark" aria-hidden="true" />
           <div>
-            <p className="seller-sidebar__app">FreshFarm Broker</p>
+            <p className="seller-sidebar__app">FreshFarm Product Reviewer</p>
             <p className="seller-sidebar__farm">
               {profile?.region || "Your region"}
               {stats?.pending ? ` · ${stats.pending} pending` : ""}
@@ -36,7 +36,7 @@ function BrokerShell() {
           </div>
         </div>
 
-        <nav className="seller-sidebar__nav" aria-label="Broker">
+        <nav className="seller-sidebar__nav" aria-label="Product Reviewer">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
@@ -67,7 +67,7 @@ function BrokerShell() {
 
       <div className="seller-main">
         <header className="seller-topbar">
-          <p className="seller-topbar__label">Broker workspace</p>
+          <p className="seller-topbar__label">Product Reviewer workspace</p>
           <a href="/" className="seller-topbar__storefront">
             View storefront
           </a>

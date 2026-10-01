@@ -8,7 +8,7 @@ const SUBMISSIONS_KEY = "freshfarm_broker_submissions";
 export const SUBMISSION_STATUSES = ["pending", "accepted", "rejected"];
 
 export const SUBMISSION_STATUS_LABELS = {
-  pending: "Awaiting broker",
+  pending: "Awaiting Product Reviewer",
   accepted: "Accepted",
   rejected: "Rejected",
 };
@@ -36,7 +36,7 @@ function ensureDemoBroker() {
       ...users,
       {
         id: "demo-broker",
-        name: "Ananya Broker",
+        name: "Product Reviewer",
         email: "broker@freshfarm.demo",
         phone: "9800012345",
         password: "broker123",
@@ -45,15 +45,27 @@ function ensureDemoBroker() {
       },
     ];
     writeJson(USERS_KEY, users);
+  } else {
+    users = users.map((user) =>
+      user.email === "broker@freshfarm.demo"
+        ? { ...user, name: "Product Reviewer" }
+        : user
+    );
+    writeJson(USERS_KEY, users);
   }
   if (!localStorage.getItem(PROFILE_KEY)) {
     writeJson(PROFILE_KEY, {
-      name: "Ananya Broker",
+      name: "Product Reviewer",
       email: "broker@freshfarm.demo",
       phone: "9800012345",
       region: "Anand & nearby",
       bio: "Connects local dairy farmers with FreshFarm customers. Farmer sets the product price.",
     });
+  } else {
+    const profile = readJson(PROFILE_KEY, {});
+    if (profile.name === "Ananya Broker") {
+      writeJson(PROFILE_KEY, { ...profile, name: "Product Reviewer" });
+    }
   }
   return users;
 }
@@ -89,7 +101,7 @@ export function getBrokerSession() {
 export function getBrokerProfile() {
   ensureDemoBroker();
   return readJson(PROFILE_KEY, {
-    name: "Broker",
+    name: "Product Reviewer",
     email: "broker@freshfarm.demo",
     phone: "",
     region: "",
@@ -184,7 +196,7 @@ export function rejectSubmission(submissionId, note = "") {
   }
   item.status = "rejected";
   item.reviewedAt = new Date().toISOString();
-  item.note = note || "Rejected by broker";
+  item.note = note || "Rejected by Product Reviewer";
   saveSubmissions(submissions);
   syncFarmerProductStatus(item.farmerId, item.productId, "rejected");
   return item;

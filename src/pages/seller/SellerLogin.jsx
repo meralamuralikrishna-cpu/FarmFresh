@@ -29,7 +29,7 @@ export default function SellerLogin() {
           Farmer sign in
         </h1>
         <p className="mb-5 mt-2 text-[0.95rem] leading-normal text-muted">
-          Set your product prices and submit details to the broker. Manage stock,
+          Set your product prices and submit details to the Product Reviewer. Manage stock,
           orders, and deliveries from your farm workspace.
         </p>
 

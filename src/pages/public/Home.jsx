@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Button from "../../components/Button";
 import farmHero from "../../assets/farm-hero.jpg";
+import freshFarmLogo from "../../assets/FreshFarmlogo-clean.png";
 import "./Home.css";
 
 export default function Home() {
@@ -13,7 +14,7 @@ export default function Home() {
         </div>
 
         <div className="home-hero__content">
-          <p className="home-hero__brand">FreshFarm</p>
+          <img className="home-hero__brand" src={freshFarmLogo} alt="FreshFarm" />
           <h1 className="home-hero__headline">
             Fresh milk, farm to door
           </h1>
@@ -29,7 +30,7 @@ export default function Home() {
               Farmer portal
             </Button>
             <Button as={Link} to="/broker/login" variant="ghost">
-              Broker portal
+              Product Reviewer portal
             </Button>
             <Button as={Link} to="/middleman/login" variant="ghost">
               Deliver with us

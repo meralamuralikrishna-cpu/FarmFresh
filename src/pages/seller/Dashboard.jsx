@@ -28,7 +28,7 @@ export default function Dashboard() {
           </p>
         </div>
         <Link to="/seller/products/new" className="seller-btn seller-btn--primary">
-          Submit to broker
+          Submit for Product Reviewer approval
         </Link>
       </div>
 

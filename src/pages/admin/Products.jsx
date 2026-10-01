@@ -53,7 +53,7 @@ export default function Products() {
           <h1 className="seller-page__title">Products</h1>
           <p className="seller-page__lede">
             Live catalog matches the customer{" "}
-            <a href="/products">Products</a> page. When a broker accepts a
+            <a href="/products">Products</a> page. When the Product Reviewer accepts a
             farmer listing, it appears here as a pending request — approve to
             add it to the shop catalog, or reject / remove it.
           </p>
@@ -84,7 +84,7 @@ export default function Products() {
         {filtered.length === 0 ? (
           <p className="seller-empty">
             {filter === "pending"
-              ? "No pending broker product requests."
+              ? "No pending Product Reviewer product requests."
               : "No products in this filter."}
           </p>
         ) : (
@@ -181,7 +181,7 @@ export default function Products() {
                     </td>
                     <td className="admin-products-table__center">
                       <span className="seller-badge seller-badge--muted">
-                        {p.source === "broker" ? "Broker" : "Catalog"}
+                        {p.source === "broker" ? "Product Reviewer" : "Catalog"}
                       </span>
                     </td>
                     <td className="admin-products-table__center">

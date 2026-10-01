@@ -50,9 +50,9 @@ export const PRODUCT_TYPES = [
 ];
 
 export const BROKER_STATUS_LABELS = {
-  pending: "Sent to broker",
-  accepted: "Broker accepted",
-  rejected: "Broker rejected",
+  pending: "Sent to Product Reviewer",
+  accepted: "Product Reviewer accepted",
+  rejected: "Product Reviewer rejected",
 };
 
 export const ORDER_STATUSES = [

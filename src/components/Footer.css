@@ -11,12 +11,11 @@
   gap: 2.5rem;
 }
 
-.footer__name {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #fff;
+.footer__logo {
+  display: block;
+  width: 8rem;
+  height: 8rem;
+  object-fit: contain;
 }
 
 .footer__brand p {

@@ -30,7 +30,7 @@ export default function Products() {
           </p>
         </div>
         <Link to="/seller/products/new" className="seller-btn seller-btn--primary">
-          Submit to broker
+          Submit for review
         </Link>
       </div>
 
@@ -46,7 +46,7 @@ export default function Products() {
                   <th>Type</th>
                   <th>Your price</th>
                   <th>Stock</th>
-                  <th>Broker</th>
+                  <th>Product Reviewer</th>
                   <th>Availability</th>
                   <th>Actions</th>
                 </tr>
@@ -164,7 +164,7 @@ export default function Products() {
           </div>
         )}
         <p style={{ margin: "1rem 0 0", color: "var(--muted)", fontSize: "0.85rem" }}>
-          Farmer sets the price. After submit, the broker reviews the listing.
+          Farmer sets the price. After submission, the Product Reviewer reviews the listing.
           Example amount: {products[0] ? formatINR(products[0].price) : "₹…"}.
         </p>
       </div>

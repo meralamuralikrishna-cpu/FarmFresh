@@ -1,6 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCustomerData } from "../context/CustomerDataContext";
+import freshFarmLogo from "../assets/FreshFarmlogo-clean.png";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -11,8 +12,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="navbar__inner">
         <Link to="/" className="navbar__brand" aria-label="FreshFarm home">
-          <span className="navbar__mark" aria-hidden="true" />
-          <span className="navbar__name">FreshFarm</span>
+          <img className="navbar__logo" src={freshFarmLogo} alt="FreshFarm" />
         </Link>
 
         <nav className="navbar__links" aria-label="Primary">

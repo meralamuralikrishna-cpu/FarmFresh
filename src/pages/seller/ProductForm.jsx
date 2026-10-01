@@ -91,10 +91,10 @@ export default function ProductForm() {
       <div className="seller-page__head">
         <div>
           <h1 className="seller-page__title">
-            {isEdit ? "Edit product" : "Submit product to broker"}
+            {isEdit ? "Edit product" : "Submit product for review"}
           </h1>
           <p className="seller-page__lede">
-            You set the selling price. New listings are sent to the broker for
+            You set the selling price. New listings are sent to the Product Reviewer for
             review.
           </p>
         </div>
@@ -195,7 +195,7 @@ export default function ProductForm() {
 
           <div className="seller-actions">
             <button type="submit" className="seller-btn seller-btn--primary">
-              {isEdit ? "Save changes" : "Submit to broker"}
+              {isEdit ? "Save changes" : "Submit for review"}
             </button>
             <Link to="/seller/products" className="seller-btn seller-btn--ghost">
               Cancel

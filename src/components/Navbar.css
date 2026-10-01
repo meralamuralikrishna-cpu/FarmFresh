@@ -22,22 +22,12 @@
   flex-shrink: 0;
 }
 
-.navbar__mark {
-  width: 1.35rem;
-  height: 1.35rem;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 35% 30%, #fff 0 28%, transparent 29%),
-    linear-gradient(145deg, var(--leaf), var(--pasture-deep));
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.08);
-}
-
-.navbar__name {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  white-space: nowrap;
+.navbar__logo {
+  display: block;
+  width: 7rem;
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .navbar__links {

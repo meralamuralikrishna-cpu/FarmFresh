@@ -34,7 +34,7 @@ export default function Profile() {
     <div>
       <div className="seller-page__head">
         <div>
-          <h1 className="seller-page__title">Broker profile</h1>
+          <h1 className="seller-page__title">Product Reviewer profile</h1>
           <p className="seller-page__lede">
             Your contact details for farmers in your region.
           </p>

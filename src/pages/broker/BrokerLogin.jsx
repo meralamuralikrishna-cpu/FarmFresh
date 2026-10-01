@@ -26,7 +26,7 @@ export default function BrokerLogin() {
           FreshFarm
         </p>
         <h1 className="mt-1.5 font-display text-[1.55rem] font-extrabold tracking-[-0.03em] text-ink">
-          Broker sign in
+          Product Reviewer sign in
         </h1>
         <p className="mb-5 mt-2 text-[0.95rem] leading-normal text-muted">
           Review farmer listings. Farmers set their own product prices before
@@ -42,11 +42,11 @@ export default function BrokerLogin() {
           className="inline-flex w-full items-center justify-center rounded-full bg-pasture px-5 py-3 text-[0.95rem] font-semibold text-white transition hover:bg-pasture-deep"
           onClick={enterDemo}
         >
-          Continue as demo broker
+          Continue as demo Product Reviewer
         </button>
 
         <p className="mt-4 text-[0.82rem] text-muted">
-          No email or password — one click opens the broker demo.
+          No email or password — one click opens the Product Reviewer demo.
         </p>
         <Link
           to="/"
